@@ -1,0 +1,11 @@
+<litepal>
+    <dbname value='cool_weather'/>
+
+    <version value='1'/>
+
+    <list>
+        <mapping class="lee.yuzer.com.weatherdemo.db.Province"/>
+        <mapping class="lee.yuzer.com.weatherdemo.db.City"/>
+        <mapping class="lee.yuzer.com.weatherdemo.db.County"/>
+    </list>
+</litepal>
