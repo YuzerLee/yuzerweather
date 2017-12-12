@@ -6,7 +6,8 @@
 
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="?attr/actionBarSize"
+        android:layout_height="75dp"
+        android:paddingTop="30dp"
         android:background="?attr/colorPrimary">
 
 
@@ -15,7 +16,6 @@
             android:layout_height="25dp"
             android:id="@+id/back_button"
             android:layout_alignParentLeft="true"
-            android:layout_centerVertical="true"
             android:layout_marginLeft="10dp"
             android:background="@mipmap/ic_arrow_back_black_24dp"/>
 
@@ -23,8 +23,17 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/title_textview"
-            android:layout_centerInParent="true"
-            android:textSize="20sp"/>
+            android:layout_centerHorizontal="true"
+            android:textSize="20sp"
+            android:textColor="#fff"/>
+
+        <Button
+            android:layout_width="25dp"
+            android:layout_height="25dp"
+            android:id="@+id/option_button"
+            android:layout_alignParentRight="true"
+            android:layout_marginRight="10dp"
+            android:background="@mipmap/ic_settings_applications_white_36dp"/>
     </RelativeLayout>
 
     <ListView

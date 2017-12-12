@@ -8,5 +8,6 @@
         <mapping class="lee.yuzer.com.weatherdemo.db.Province"/>
         <mapping class="lee.yuzer.com.weatherdemo.db.City"/>
         <mapping class="lee.yuzer.com.weatherdemo.db.County"/>
+        <mapping class="lee.yuzer.com.weatherdemo.db.StoredCity"/>
     </list>
 </litepal>

@@ -16,16 +16,15 @@ import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import org.litepal.crud.DataSupport;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-
 import lee.yuzer.com.weatherdemo.db.City;
 import lee.yuzer.com.weatherdemo.db.County;
 import lee.yuzer.com.weatherdemo.db.Province;
+import lee.yuzer.com.weatherdemo.db.StoredCity;
+import lee.yuzer.com.weatherdemo.gson.Weather;
 import lee.yuzer.com.weatherdemo.util.HttpUtil;
 import lee.yuzer.com.weatherdemo.util.Utility;
 import okhttp3.Call;
@@ -49,9 +48,11 @@ public class ChooseAreaFragment extends Fragment {
     private List<Province> mProvinceList;
     private List<City> mCityList;
     private List<County> mCountyList;
+    private List<StoredCity> mStoredCities;
     private Province selectedProvince;
     private City selectedCity;
     private int currentLevel;
+    private Button optionButton;
 
     @RequiresApi(api = Build.VERSION_CODES.M)
     @Nullable
@@ -60,9 +61,11 @@ public class ChooseAreaFragment extends Fragment {
         View view = inflater.inflate(R.layout.choose_area, container, false);
         titleText = (TextView)view.findViewById(R.id.title_textview);
         backButton = (Button)view.findViewById(R.id.back_button);
+        optionButton = (Button)view.findViewById(R.id.option_button);
         mListView = (ListView)view.findViewById(R.id.area_listview);
         mAdapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_list_item_1, dataList);
         mListView.setAdapter(mAdapter);
+        mStoredCities = new ArrayList<>();
         return view;
     }
 
@@ -79,18 +82,41 @@ public class ChooseAreaFragment extends Fragment {
                     selectedCity = mCityList.get(position);
                     queryCounties();
                 }else if(currentLevel == LEVEL_COUNTY){
+                    //ViewPager版本
                     String countyName = mCountyList.get(position).getCountyName();
+                    mStoredCities = DataSupport.where("name = ?", countyName).find(StoredCity.class);
                     if(getActivity() instanceof MainActivity){
-                        Intent intent = new Intent(getActivity(), WeatherActivity.class);
+                        Intent intent = new Intent(getActivity(), WeatherViewPagerActivity.class);
                         intent.putExtra("county_name", countyName);
                         startActivity(intent);
                         getActivity().finish();
-                    }else if(getActivity() instanceof WeatherActivity){
-                        WeatherActivity activity = (WeatherActivity)getActivity();
-                        activity.mDrawerLayout.closeDrawers();
-                        activity.mSwipeRefreshLayout.setRefreshing(true);
-                        activity.requestWeather(countyName);
+                    }else if(getActivity() instanceof WeatherViewPagerActivity){
+                        if(mStoredCities.size() == 0){
+                            //所选城市没有在ViewPager中显示
+                            WeatherViewPagerActivity activity = (WeatherViewPagerActivity)getActivity();
+                            queryProvinces();//让选择城市的页面恢复到省级别
+                            activity.mDrawerLayout.closeDrawers();
+                            activity.requestWeather(countyName);
+                        }else{
+                            //所选城市已经在ViewPager中显示
+                            String responseText = mStoredCities.get(0).getContent();
+                            Weather weather = Utility.handleWeatherResponse(responseText);
+                            WeatherViewPagerActivity activity = (WeatherViewPagerActivity)getActivity();
+                            queryProvinces();//让选择城市的页面恢复到省级别
+                            activity.mDrawerLayout.closeDrawers();
+                            //解决重新跳转到已经存在的城市界面问题
+                            int index = 0;
+                            String selectedcityname = mStoredCities.get(0).getName();
+                            mStoredCities = DataSupport.findAll(StoredCity.class);
+                            for(StoredCity city : mStoredCities){
+                                if(city.getName().equals(selectedcityname))
+                                    break;
+                                index++;
+                            }
+                            activity.mViewPager.setCurrentItem(index);
+                        }
                     }
+
                 }
             }
         });
@@ -102,6 +128,12 @@ public class ChooseAreaFragment extends Fragment {
                 }else if(currentLevel == LEVEL_CITY){
                     queryProvinces();;
                 }
+            }
+        });
+        optionButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
             }
         });
         queryProvinces();

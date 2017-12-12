@@ -116,6 +116,7 @@ public class WeatherActivity extends AppCompatActivity {
                 Weather weather = Utility.handleWeatherResponse(weatherString);
                 countyName = weather.basic.cityName;
                 requestWeather(countyName);
+                loadBingPic();
             }
         });
     }
