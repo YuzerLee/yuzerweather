@@ -133,7 +133,10 @@ public class ChooseAreaFragment extends Fragment {
         optionButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
+                WeatherViewPagerActivity activity = (WeatherViewPagerActivity)getActivity();
+                activity.mDrawerLayout.closeDrawers();
+                Intent intent = new Intent(activity, OptionActivity.class);
+                startActivity(intent);
             }
         });
         queryProvinces();

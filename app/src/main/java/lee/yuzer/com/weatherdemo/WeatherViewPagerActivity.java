@@ -1,5 +1,6 @@
 package lee.yuzer.com.weatherdemo;
 
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Build;
@@ -29,6 +30,7 @@ import lee.yuzer.com.weatherdemo.db.StoredCity;
 import lee.yuzer.com.weatherdemo.gson.Forecast;
 import lee.yuzer.com.weatherdemo.gson.Lifestyle;
 import lee.yuzer.com.weatherdemo.gson.Weather;
+import lee.yuzer.com.weatherdemo.service.AutoUpdateService;
 import lee.yuzer.com.weatherdemo.util.HttpUtil;
 import lee.yuzer.com.weatherdemo.util.Utility;
 import okhttp3.Call;
@@ -62,13 +64,14 @@ public class WeatherViewPagerActivity extends AppCompatActivity implements ViewP
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_weather);
-
-        if(Build.VERSION.SDK_INT >= 21){
+        if (Build.VERSION.SDK_INT >= 21) {
             View decorView = getWindow().getDecorView();
             decorView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN | View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
             getWindow().setStatusBarColor(Color.TRANSPARENT);
         }
+
+        setContentView(R.layout.activity_weather);
+
 
         initView();
 
@@ -76,42 +79,42 @@ public class WeatherViewPagerActivity extends AppCompatActivity implements ViewP
         initViewPager();
     }
 
-    private void initView(){
+    private void initView() {
         mStoredCities = new ArrayList<>();
         mViewPagerList = new ArrayList<>();
 
-        titleCity = (TextView)findViewById(R.id.title_city);
-        titleUpdateTime = (TextView)findViewById(R.id.title_update_time);
-        bingPicImg = (ImageView)findViewById(R.id.bing_pic_img);
+        titleCity = (TextView) findViewById(R.id.title_city);
+        titleUpdateTime = (TextView) findViewById(R.id.title_update_time);
+        bingPicImg = (ImageView) findViewById(R.id.bing_pic_img);
         dotView = new ArrayList<>();
-        removeCityButton = (Button)findViewById(R.id.deletecity_button);
+        removeCityButton = (Button) findViewById(R.id.deletecity_button);
         mStoredCities = DataSupport.findAll(StoredCity.class);
-        if(mStoredCities.size() <= 1){
+        if (mStoredCities.size() <= 1) {
             removeCityButton.setVisibility(View.GONE);
         }
         removeCityButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 mStoredCities = DataSupport.findAll(StoredCity.class);
-                if(mStoredCities.size() > 1){
+                if (mStoredCities.size() > 1) {
                     View ViewPagerLayout = MyViewPagerAdatper.mCurrentView;
                     mStoredCities = DataSupport.where("name = ?", titleCity.getText().toString()).find(StoredCity.class);
                     DataSupport.deleteAll(StoredCity.class, "name = ?", mStoredCities.get(0).getName());
                     mViewPagerList.remove(ViewPagerLayout);
                     mViewPagerList.clear();
-                    LinearLayout containerlayout = (LinearLayout)findViewById(R.id.container_layout);
+                    LinearLayout containerlayout = (LinearLayout) findViewById(R.id.container_layout);
                     containerlayout.removeView(mViewPager);
                     mPagerAdapter = new MyViewPagerAdatper(mViewPagerList);
                     mViewPager = new ViewPager(WeatherViewPagerActivity.this);
                     mViewPager.setAdapter(mPagerAdapter);
                     mViewPager.setOnPageChangeListener(WeatherViewPagerActivity.this);
                     containerlayout.addView(mViewPager);
-                    loadHistoryViewPagerData();
+                    loadHistoryData();
                 }
             }
         });
-        mDrawerLayout = (DrawerLayout)findViewById(R.id.drawer_layout);
-        chooseCityButton = (Button)findViewById(R.id.nav_button);
+        mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+        chooseCityButton = (Button) findViewById(R.id.nav_button);
         chooseCityButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -120,32 +123,43 @@ public class WeatherViewPagerActivity extends AppCompatActivity implements ViewP
         });
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
         String bingPic = prefs.getString("bing_pic", null);
-        if(bingPic != null){
+        if (bingPic != null) {
             Glide.with(this).load(bingPic).into(bingPicImg);
-        }else{
+        } else {
             loadBingPic();
         }
     }
 
-    private void initViewPager(){
-        mViewPager = (ViewPager)findViewById(R.id.myViewPager);
+    private void initViewPager() {
+        mViewPager = (ViewPager) findViewById(R.id.myViewPager);
         mStoredCities = DataSupport.findAll(StoredCity.class);
         mPagerAdapter = new MyViewPagerAdatper(mViewPagerList);
         mViewPager.setAdapter(mPagerAdapter);
 
-        if(mStoredCities.size() == 0){
+        if (mStoredCities.size() == 0) {
             countyName = getIntent().getStringExtra("county_name");
             requestWeather(countyName);
-        }else{
+        } else {
             loadHistoryData();
+        }
+
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        Boolean state = prefs.getBoolean("switch_state", true);
+        if (state == true) {
+            TriggerService();
         }
 
         mViewPager.setOnPageChangeListener(this);
     }
 
-    private void loadHistoryViewPagerData(){
+    private void TriggerService() {
+        Intent intent = new Intent(this, AutoUpdateService.class);
+        startService(intent);
+    }
+
+    private void loadHistoryData() {
         mStoredCities = DataSupport.findAll(StoredCity.class);
-        for(int i = 0; i < mStoredCities.size(); i++){
+        for (int i = 0; i < mStoredCities.size(); i++) {
             Weather weather = Utility.handleWeatherResponse(mStoredCities.get(i).getContent());
             showWeatherInfoForLoad(weather);
         }
@@ -154,69 +168,42 @@ public class WeatherViewPagerActivity extends AppCompatActivity implements ViewP
         titleCity.setText(mStoredCities.get(0).getName());
         titleUpdateTime.setText(mStoredCities.get(0).getTime().split(" ")[1]);
 
-        if(mStoredCities.size() == 1){
+        if (mStoredCities.size() == 1) {
             removeCityButton.setVisibility(View.GONE);
-        }else{
+        } else {
             removeCityButton.setVisibility(View.VISIBLE);
         }
 
-        if(mStoredCities.size() > 1){
+        if (mStoredCities.size() > 1) {
             LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(15, 15);
             params.setMargins(10, 0, 10, 0);
-            LinearLayout dotlayout = (LinearLayout)findViewById(R.id.dot_layout);
+            LinearLayout dotlayout = (LinearLayout) findViewById(R.id.dot_layout);
             dotlayout.removeAllViews();
             dotView.clear();
-            for(int i = 0; i < mStoredCities.size(); i++){
+            for (int i = 0; i < mStoredCities.size(); i++) {
                 ImageView iv = new ImageView(this);
                 iv.setLayoutParams(params);
                 iv.setImageResource(R.drawable.dot_selector);
-                if(i == 0){
+                if (i == 0) {
                     iv.setSelected(true);
-                }else{
+
+                    //对被选中dot进行放大处理
+                    LinearLayout.LayoutParams paramsBig = new LinearLayout.LayoutParams(30, 30);
+                    params.setMargins(10, 0, 10, 0);
+                    iv.setLayoutParams(paramsBig);
+                } else {
                     iv.setSelected(false);
                 }
                 dotView.add(iv);
                 dotlayout.addView(iv);
             }
-        }else{
-            LinearLayout dotlayout = (LinearLayout)findViewById(R.id.dot_layout);
+        } else {
+            LinearLayout dotlayout = (LinearLayout) findViewById(R.id.dot_layout);
             dotlayout.removeAllViews();
         }
     }
 
-    private void loadHistoryData(){
-        mStoredCities = DataSupport.findAll(StoredCity.class);
-        for(int i = 0; i < mStoredCities.size(); i++){
-            Weather weather = Utility.handleWeatherResponse(mStoredCities.get(i).getContent());
-            showWeatherInfoForLoad(weather);
-        }
-        mViewPager.setCurrentItem(0);
-
-        titleCity.setText(mStoredCities.get(0).getName());
-        titleUpdateTime.setText(mStoredCities.get(0).getTime().split(" ")[1]);
-
-        if(mStoredCities.size() > 1){
-            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(15, 15);
-            params.setMargins(10, 0, 10, 0);
-            LinearLayout dotlayout = (LinearLayout)findViewById(R.id.dot_layout);
-            dotlayout.removeAllViews();
-            dotView.clear();
-            for(int i = 0; i < mStoredCities.size(); i++){
-                ImageView iv = new ImageView(this);
-                iv.setLayoutParams(params);
-                iv.setImageResource(R.drawable.dot_selector);
-                if(i == 0){
-                    iv.setSelected(true);
-                }else{
-                    iv.setSelected(false);
-                }
-                dotView.add(iv);
-                dotlayout.addView(iv);
-            }
-        }
-    }
-
-    private void loadBingPic(){
+    private void loadBingPic() {
         String requestBingPic = "http://guolin.tech/api/bing_pic";
         HttpUtil.sendOkHttpRequest(requestBingPic, new Callback() {
             @Override
@@ -243,7 +230,7 @@ public class WeatherViewPagerActivity extends AppCompatActivity implements ViewP
     /**
      * 根据天气id请求城市天气信息
      */
-    public void requestWeather(final String countyName){
+    public void requestWeather(final String countyName) {
         String weatherUrl = "https://free-api.heweather.com/s6/weather?location=" + countyName + "&key=4a379f0c0bde4c53b70c47628a72a8c3";
 
         HttpUtil.sendOkHttpRequest(weatherUrl, new Callback() {
@@ -267,11 +254,11 @@ public class WeatherViewPagerActivity extends AppCompatActivity implements ViewP
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        if(weather != null && "ok".equals(weather.status) ){
+                        if (weather != null && "ok".equals(weather.status)) {
                             //ViewPager版本
                             List<StoredCity> mTempCities = new ArrayList<>();
                             mTempCities = DataSupport.where("name = ?", weather.basic.cityName).find(StoredCity.class);
-                            if(mTempCities.size() == 0){
+                            if (mTempCities.size() == 0) {
                                 // 新城市，进行添加操作
                                 StoredCity city = new StoredCity();
                                 city.setName(weather.basic.cityName);
@@ -279,7 +266,7 @@ public class WeatherViewPagerActivity extends AppCompatActivity implements ViewP
                                 city.setTime(weather.update.loc);
                                 city.save();
                                 showWeatherInfo(weather);
-                            }else{
+                            } else {
                                 //进行该城市的信息刷新
                                 StoredCity city = new StoredCity();
                                 city.setName(weather.basic.cityName);
@@ -289,7 +276,7 @@ public class WeatherViewPagerActivity extends AppCompatActivity implements ViewP
                                 showWeatherInfoRefresh(weather);
                             }
 
-                        }else{
+                        } else {
                             Toast.makeText(WeatherViewPagerActivity.this, "获取天气信息失败", Toast.LENGTH_SHORT).show();
                         }
                         mSwipeRefreshLayout.setRefreshing(false);
@@ -300,9 +287,9 @@ public class WeatherViewPagerActivity extends AppCompatActivity implements ViewP
     }
 
     //刷新时进行viewPager的初始化显示
-    public void showWeatherInfoRefresh(Weather weather){
+    public void showWeatherInfoRefresh(Weather weather) {
         View ViewPagerLayout = MyViewPagerAdatper.mCurrentView;
-        mSwipeRefreshLayout = (SwipeRefreshLayout)ViewPagerLayout.findViewById(R.id.swipe_refresh);
+        mSwipeRefreshLayout = (SwipeRefreshLayout) ViewPagerLayout.findViewById(R.id.swipe_refresh);
         mSwipeRefreshLayout.setColorSchemeResources(R.color.colorPrimary);
         mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
@@ -318,24 +305,24 @@ public class WeatherViewPagerActivity extends AppCompatActivity implements ViewP
         String weatherInfo = weather.now.cond_txt;
         titleCity.setText(cityName);
         titleUpdateTime.setText(updateTime);
-        degreeText = (TextView)ViewPagerLayout.findViewById(R.id.degree_text);
-        weatherInfoText = (TextView)ViewPagerLayout.findViewById(R.id.weather_info_text);
-        forecastLayout = (LinearLayout)ViewPagerLayout.findViewById(R.id.forecast_layout);
-        aqiText = (TextView)ViewPagerLayout.findViewById(R.id.aqi_text);
-        pm25Text = (TextView)ViewPagerLayout.findViewById(R.id.pm25_text);
-        comfortText = (TextView)ViewPagerLayout.findViewById(R.id.comfort_text);
-        carWashText = (TextView)ViewPagerLayout.findViewById(R.id.car_wash_text);
-        sportText = (TextView)ViewPagerLayout.findViewById(R.id.sport_text);
-        weatherLayout = (ScrollView)ViewPagerLayout.findViewById(R.id.weather_layout);
+        degreeText = (TextView) ViewPagerLayout.findViewById(R.id.degree_text);
+        weatherInfoText = (TextView) ViewPagerLayout.findViewById(R.id.weather_info_text);
+        forecastLayout = (LinearLayout) ViewPagerLayout.findViewById(R.id.forecast_layout);
+        aqiText = (TextView) ViewPagerLayout.findViewById(R.id.aqi_text);
+        pm25Text = (TextView) ViewPagerLayout.findViewById(R.id.pm25_text);
+        comfortText = (TextView) ViewPagerLayout.findViewById(R.id.comfort_text);
+        carWashText = (TextView) ViewPagerLayout.findViewById(R.id.car_wash_text);
+        sportText = (TextView) ViewPagerLayout.findViewById(R.id.sport_text);
+        weatherLayout = (ScrollView) ViewPagerLayout.findViewById(R.id.weather_layout);
         degreeText.setText(degree);
         weatherInfoText.setText(weatherInfo);
         forecastLayout.removeAllViews();
-        for(Forecast forecast : weather.forecastList){
+        for (Forecast forecast : weather.forecastList) {
             View view = LayoutInflater.from(this).inflate(R.layout.forecast_item, forecastLayout, false);
-            TextView dateText = (TextView)view.findViewById(R.id.date_text);
-            TextView infoText = (TextView)view.findViewById(R.id.info_text);
-            TextView maxText = (TextView)view.findViewById(R.id.max_text);
-            TextView minText = (TextView)view.findViewById(R.id.min_text);
+            TextView dateText = (TextView) view.findViewById(R.id.date_text);
+            TextView infoText = (TextView) view.findViewById(R.id.info_text);
+            TextView maxText = (TextView) view.findViewById(R.id.max_text);
+            TextView minText = (TextView) view.findViewById(R.id.min_text);
             dateText.setText(forecast.date);
             infoText.setText(forecast.cond_txt_d);
             maxText.setText(forecast.tmp_max);
@@ -349,26 +336,28 @@ public class WeatherViewPagerActivity extends AppCompatActivity implements ViewP
         String comfort;
         String carWash;
         String sport;
-        for(Lifestyle lifestyle : weather.lifestyleList){
-            if(lifestyle.type.equals("comf")){
+        for (Lifestyle lifestyle : weather.lifestyleList) {
+            if (lifestyle.type.equals("comf")) {
                 comfort = "舒适度：" + lifestyle.txt;
                 comfortText.setText(comfort);
-            }else if(lifestyle.type.equals("cw")){
+            } else if (lifestyle.type.equals("cw")) {
                 carWash = "洗车指数：" + lifestyle.txt;
                 carWashText.setText(carWash);
-            }else if(lifestyle.type.equals("sport")){
+            } else if (lifestyle.type.equals("sport")) {
                 sport = "运动建议：" + lifestyle.txt;
                 sportText.setText(sport);
             }
         }
         weatherLayout.setVisibility(View.VISIBLE);
         mPagerAdapter.notifyDataSetChanged();
+
+        loadBingPic();
     }
 
     //新城市添加时进行viewPager的初始化显示
-    public void showWeatherInfo(Weather weather){
+    public void showWeatherInfo(Weather weather) {
         View ViewPagerLayout = getLayoutInflater().from(this).inflate(R.layout.viewpager_item, null);
-        mSwipeRefreshLayout = (SwipeRefreshLayout)ViewPagerLayout.findViewById(R.id.swipe_refresh);
+        mSwipeRefreshLayout = (SwipeRefreshLayout) ViewPagerLayout.findViewById(R.id.swipe_refresh);
         mSwipeRefreshLayout.setColorSchemeResources(R.color.colorPrimary);
         mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
@@ -384,24 +373,24 @@ public class WeatherViewPagerActivity extends AppCompatActivity implements ViewP
         String weatherInfo = weather.now.cond_txt;
         titleCity.setText(cityName);
         titleUpdateTime.setText(updateTime);
-        degreeText = (TextView)ViewPagerLayout.findViewById(R.id.degree_text);
-        weatherInfoText = (TextView)ViewPagerLayout.findViewById(R.id.weather_info_text);
-        forecastLayout = (LinearLayout)ViewPagerLayout.findViewById(R.id.forecast_layout);
-        aqiText = (TextView)ViewPagerLayout.findViewById(R.id.aqi_text);
-        pm25Text = (TextView)ViewPagerLayout.findViewById(R.id.pm25_text);
-        comfortText = (TextView)ViewPagerLayout.findViewById(R.id.comfort_text);
-        carWashText = (TextView)ViewPagerLayout.findViewById(R.id.car_wash_text);
-        sportText = (TextView)ViewPagerLayout.findViewById(R.id.sport_text);
-        weatherLayout = (ScrollView)ViewPagerLayout.findViewById(R.id.weather_layout);
+        degreeText = (TextView) ViewPagerLayout.findViewById(R.id.degree_text);
+        weatherInfoText = (TextView) ViewPagerLayout.findViewById(R.id.weather_info_text);
+        forecastLayout = (LinearLayout) ViewPagerLayout.findViewById(R.id.forecast_layout);
+        aqiText = (TextView) ViewPagerLayout.findViewById(R.id.aqi_text);
+        pm25Text = (TextView) ViewPagerLayout.findViewById(R.id.pm25_text);
+        comfortText = (TextView) ViewPagerLayout.findViewById(R.id.comfort_text);
+        carWashText = (TextView) ViewPagerLayout.findViewById(R.id.car_wash_text);
+        sportText = (TextView) ViewPagerLayout.findViewById(R.id.sport_text);
+        weatherLayout = (ScrollView) ViewPagerLayout.findViewById(R.id.weather_layout);
         degreeText.setText(degree);
         weatherInfoText.setText(weatherInfo);
         forecastLayout.removeAllViews();
-        for(Forecast forecast : weather.forecastList){
+        for (Forecast forecast : weather.forecastList) {
             View view = LayoutInflater.from(this).inflate(R.layout.forecast_item, forecastLayout, false);
-            TextView dateText = (TextView)view.findViewById(R.id.date_text);
-            TextView infoText = (TextView)view.findViewById(R.id.info_text);
-            TextView maxText = (TextView)view.findViewById(R.id.max_text);
-            TextView minText = (TextView)view.findViewById(R.id.min_text);
+            TextView dateText = (TextView) view.findViewById(R.id.date_text);
+            TextView infoText = (TextView) view.findViewById(R.id.info_text);
+            TextView maxText = (TextView) view.findViewById(R.id.max_text);
+            TextView minText = (TextView) view.findViewById(R.id.min_text);
             dateText.setText(forecast.date);
             infoText.setText(forecast.cond_txt_d);
             maxText.setText(forecast.tmp_max);
@@ -415,14 +404,14 @@ public class WeatherViewPagerActivity extends AppCompatActivity implements ViewP
         String comfort;
         String carWash;
         String sport;
-        for(Lifestyle lifestyle : weather.lifestyleList){
-            if(lifestyle.type.equals("comf")){
+        for (Lifestyle lifestyle : weather.lifestyleList) {
+            if (lifestyle.type.equals("comf")) {
                 comfort = "舒适度：" + lifestyle.txt;
                 comfortText.setText(comfort);
-            }else if(lifestyle.type.equals("cw")){
+            } else if (lifestyle.type.equals("cw")) {
                 carWash = "洗车指数：" + lifestyle.txt;
                 carWashText.setText(carWash);
-            }else if(lifestyle.type.equals("sport")){
+            } else if (lifestyle.type.equals("sport")) {
                 sport = "运动建议：" + lifestyle.txt;
                 sportText.setText(sport);
             }
@@ -435,9 +424,9 @@ public class WeatherViewPagerActivity extends AppCompatActivity implements ViewP
     }
 
     //启动程序加载已存储城市数据时进行viewPager的初始化显示
-    public void showWeatherInfoForLoad(Weather weather){
+    public void showWeatherInfoForLoad(Weather weather) {
         View ViewPagerLayout = getLayoutInflater().from(this).inflate(R.layout.viewpager_item, null);
-        mSwipeRefreshLayout = (SwipeRefreshLayout)ViewPagerLayout.findViewById(R.id.swipe_refresh);
+        mSwipeRefreshLayout = (SwipeRefreshLayout) ViewPagerLayout.findViewById(R.id.swipe_refresh);
         mSwipeRefreshLayout.setColorSchemeResources(R.color.colorPrimary);
         mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
@@ -453,24 +442,24 @@ public class WeatherViewPagerActivity extends AppCompatActivity implements ViewP
         String weatherInfo = weather.now.cond_txt;
         titleCity.setText(cityName);
         titleUpdateTime.setText(updateTime);
-        degreeText = (TextView)ViewPagerLayout.findViewById(R.id.degree_text);
-        weatherInfoText = (TextView)ViewPagerLayout.findViewById(R.id.weather_info_text);
-        forecastLayout = (LinearLayout)ViewPagerLayout.findViewById(R.id.forecast_layout);
-        aqiText = (TextView)ViewPagerLayout.findViewById(R.id.aqi_text);
-        pm25Text = (TextView)ViewPagerLayout.findViewById(R.id.pm25_text);
-        comfortText = (TextView)ViewPagerLayout.findViewById(R.id.comfort_text);
-        carWashText = (TextView)ViewPagerLayout.findViewById(R.id.car_wash_text);
-        sportText = (TextView)ViewPagerLayout.findViewById(R.id.sport_text);
-        weatherLayout = (ScrollView)ViewPagerLayout.findViewById(R.id.weather_layout);
+        degreeText = (TextView) ViewPagerLayout.findViewById(R.id.degree_text);
+        weatherInfoText = (TextView) ViewPagerLayout.findViewById(R.id.weather_info_text);
+        forecastLayout = (LinearLayout) ViewPagerLayout.findViewById(R.id.forecast_layout);
+        aqiText = (TextView) ViewPagerLayout.findViewById(R.id.aqi_text);
+        pm25Text = (TextView) ViewPagerLayout.findViewById(R.id.pm25_text);
+        comfortText = (TextView) ViewPagerLayout.findViewById(R.id.comfort_text);
+        carWashText = (TextView) ViewPagerLayout.findViewById(R.id.car_wash_text);
+        sportText = (TextView) ViewPagerLayout.findViewById(R.id.sport_text);
+        weatherLayout = (ScrollView) ViewPagerLayout.findViewById(R.id.weather_layout);
         degreeText.setText(degree);
         weatherInfoText.setText(weatherInfo);
         forecastLayout.removeAllViews();
-        for(Forecast forecast : weather.forecastList){
+        for (Forecast forecast : weather.forecastList) {
             View view = LayoutInflater.from(this).inflate(R.layout.forecast_item, forecastLayout, false);
-            TextView dateText = (TextView)view.findViewById(R.id.date_text);
-            TextView infoText = (TextView)view.findViewById(R.id.info_text);
-            TextView maxText = (TextView)view.findViewById(R.id.max_text);
-            TextView minText = (TextView)view.findViewById(R.id.min_text);
+            TextView dateText = (TextView) view.findViewById(R.id.date_text);
+            TextView infoText = (TextView) view.findViewById(R.id.info_text);
+            TextView maxText = (TextView) view.findViewById(R.id.max_text);
+            TextView minText = (TextView) view.findViewById(R.id.min_text);
             dateText.setText(forecast.date);
             infoText.setText(forecast.cond_txt_d);
             maxText.setText(forecast.tmp_max);
@@ -484,14 +473,14 @@ public class WeatherViewPagerActivity extends AppCompatActivity implements ViewP
         String comfort;
         String carWash;
         String sport;
-        for(Lifestyle lifestyle : weather.lifestyleList){
-            if(lifestyle.type.equals("comf")){
+        for (Lifestyle lifestyle : weather.lifestyleList) {
+            if (lifestyle.type.equals("comf")) {
                 comfort = "舒适度：" + lifestyle.txt;
                 comfortText.setText(comfort);
-            }else if(lifestyle.type.equals("cw")){
+            } else if (lifestyle.type.equals("cw")) {
                 carWash = "洗车指数：" + lifestyle.txt;
                 carWashText.setText(carWash);
-            }else if(lifestyle.type.equals("sport")){
+            } else if (lifestyle.type.equals("sport")) {
                 sport = "运动建议：" + lifestyle.txt;
                 sportText.setText(sport);
             }
@@ -511,30 +500,35 @@ public class WeatherViewPagerActivity extends AppCompatActivity implements ViewP
     @Override
     public void onPageSelected(int position) {
         mStoredCities = DataSupport.findAll(StoredCity.class);
-        if(mStoredCities.size() == 1){
+        if (mStoredCities.size() == 1) {
             removeCityButton.setVisibility(View.GONE);
-        }else{
+        } else {
             removeCityButton.setVisibility(View.VISIBLE);
         }
-        for(int i = 0; i < mStoredCities.size(); i++){
-            if(i == position){
+        for (int i = 0; i < mStoredCities.size(); i++) {
+            if (i == position) {
                 titleCity.setText(mStoredCities.get(i).getName());
                 titleUpdateTime.setText(mStoredCities.get(i).getTime().split(" ")[1]);
             }
         }
-        if(mStoredCities.size() > 1){
+        if (mStoredCities.size() > 1) {
             LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(15, 15);
             params.setMargins(10, 0, 10, 0);
-            LinearLayout dotlayout = (LinearLayout)findViewById(R.id.dot_layout);
+            LinearLayout dotlayout = (LinearLayout) findViewById(R.id.dot_layout);
             dotlayout.removeAllViews();
             dotView.clear();
-            for(int i = 0; i < mStoredCities.size(); i++){
+            for (int i = 0; i < mStoredCities.size(); i++) {
                 ImageView iv = new ImageView(WeatherViewPagerActivity.this);
                 iv.setLayoutParams(params);
                 iv.setImageResource(R.drawable.dot_selector);
-                if(i == position){
+                if (i == position) {
                     iv.setSelected(true);
-                }else{
+
+                    //对被选中dot进行放大处理
+                    LinearLayout.LayoutParams paramsBig = new LinearLayout.LayoutParams(30, 30);
+                    params.setMargins(10, 0, 10, 0);
+                    iv.setLayoutParams(paramsBig);
+                } else {
                     iv.setSelected(false);
                 }
                 dotView.add(iv);

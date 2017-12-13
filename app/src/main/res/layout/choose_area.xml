@@ -17,7 +17,7 @@
             android:id="@+id/back_button"
             android:layout_alignParentLeft="true"
             android:layout_marginLeft="10dp"
-            android:background="@mipmap/ic_arrow_back_black_24dp"/>
+            android:background="@mipmap/ic_arrow_back_white_36dp"/>
 
         <TextView
             android:layout_width="wrap_content"
