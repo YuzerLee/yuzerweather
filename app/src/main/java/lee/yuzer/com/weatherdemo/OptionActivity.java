@@ -10,6 +10,7 @@ import android.os.Message;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -40,6 +41,9 @@ public class OptionActivity extends AppCompatActivity implements View.OnClickLis
     private TextView intervalText;
     public static String SendInfo;
     private PopupWindow popupWindow;
+    private boolean switchstateold;
+    private String intervalold;
+
     public Handler mHandler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
@@ -81,14 +85,10 @@ public class OptionActivity extends AppCompatActivity implements View.OnClickLis
             IntervalTitleText.setTextColor(0xFF909090);
             IntervalTimeText.setTextColor(0xFF909090);
             IntervalLayout.setOnClickListener(null);
-            Intent intent = new Intent(this, AutoUpdateService.class);
-            stopService(intent);
         } else {
             IntervalTitleText.setTextColor(Color.WHITE);
             IntervalTimeText.setTextColor(Color.WHITE);
             IntervalLayout.setOnClickListener(this);
-            Intent intent = new Intent(this, AutoUpdateService.class);
-            startService(intent);
         }
         if (bingPic != null) {
             Glide.with(this).load(bingPic).into(bg);
@@ -164,12 +164,16 @@ public class OptionActivity extends AppCompatActivity implements View.OnClickLis
         popupWindow.showAtLocation(parent, Gravity.BOTTOM, 0, 50);
     }
 
+
+
     @Override
     protected void onResume() {
         super.onResume();
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
         SendInfo = prefs.getString("selected_text", "未知");
-
+        //获取用户之前的数据，用于在该activity结束之前进行判断，从而分析用户是否更改了相关设置
+        switchstateold = mSwitch.isChecked();
+        intervalold = intervalText.getText().toString();
     }
 
     @Override
@@ -178,6 +182,24 @@ public class OptionActivity extends AppCompatActivity implements View.OnClickLis
         SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(OptionActivity.this).edit();
         editor.putString("selected_text", SendInfo);
         editor.apply();
+        //判断用户是否在离开该页面之前改变了相关的设置，如果改变了则进行相关的判断，决定是否重新发起服务的使用
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        Boolean state = prefs.getBoolean("switch_state", true);
+        if (state == switchstateold) {
+            if(state == true && (!intervalText.getText().toString().equals(intervalold))){
+                Intent intent = new Intent(this, AutoUpdateService.class);
+                startService(intent);
+            }
+        } else {
+            if(state == true){
+                Intent intent = new Intent(this, AutoUpdateService.class);
+                startService(intent);
+            }else{
+                Intent intent = new Intent(this, AutoUpdateService.class);
+                stopService(intent);
+                Log.d("service", "stop");
+            }
+        }
     }
 
 }
