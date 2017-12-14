@@ -60,6 +60,7 @@ public class WeatherViewPagerActivity extends AppCompatActivity implements ViewP
     private List<StoredCity> mStoredCities;
     private List<ImageView> dotView;
     private Button removeCityButton;
+    private static String SERVICE_START= "lee.yuzer.com.houtai";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -154,7 +155,10 @@ public class WeatherViewPagerActivity extends AppCompatActivity implements ViewP
 
     private void TriggerService() {
         Intent intent = new Intent(this, AutoUpdateService.class);
+        intent.setAction(SERVICE_START);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         startService(intent);
+        Log.d("service", "start");
     }
 
     private void loadHistoryData() {

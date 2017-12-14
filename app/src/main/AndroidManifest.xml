@@ -3,6 +3,7 @@
           package="lee.yuzer.com.weatherdemo">
 
     <uses-permission android:name="android.permission.INTERNET"/>
+    <user-permission android:name="android.permissino.RECEIVE_BOOT_COMPLETED"/>
 
     <application
         android:name="org.litepal.LitePalApplication"
@@ -26,11 +27,24 @@
         <service
             android:name=".service.AutoUpdateService"
             android:enabled="true"
-            android:exported="true">
+            android:exported="true"
+            android:process="system">
+            <intent-filter>
+                <action android:name="lee.yuzer.com.houtai"/>
+            </intent-filter>
         </service>
 
         <activity android:name=".OptionActivity">
         </activity>
+
+        <receiver
+            android:name=".BroadcastReceiver.BootCompleteReceiver"
+            android:enabled="true"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED"/>
+            </intent-filter>
+        </receiver>
     </application>
 
 </manifest>

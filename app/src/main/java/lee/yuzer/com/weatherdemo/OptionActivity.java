@@ -43,6 +43,7 @@ public class OptionActivity extends AppCompatActivity implements View.OnClickLis
     private PopupWindow popupWindow;
     private boolean switchstateold;
     private String intervalold;
+    private static String SERVICE_START= "lee.yuzer.com.houtai";
 
     public Handler mHandler = new Handler() {
         @Override
@@ -189,11 +190,17 @@ public class OptionActivity extends AppCompatActivity implements View.OnClickLis
             if(state == true && (!intervalText.getText().toString().equals(intervalold))){
                 Intent intent = new Intent(this, AutoUpdateService.class);
                 startService(intent);
+                intent.setAction(SERVICE_START);
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                Log.d("service", "start");
             }
         } else {
             if(state == true){
                 Intent intent = new Intent(this, AutoUpdateService.class);
                 startService(intent);
+                intent.setAction(SERVICE_START);
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                Log.d("service", "start");
             }else{
                 Intent intent = new Intent(this, AutoUpdateService.class);
                 stopService(intent);
