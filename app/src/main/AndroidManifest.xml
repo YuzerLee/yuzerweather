@@ -28,8 +28,7 @@
         <service
             android:name=".service.AutoUpdateService"
             android:enabled="true"
-            android:exported="true"
-            android:process="system">
+            android:exported="true">
             <intent-filter>
                 <action android:name="lee.yuzer.com.houtai"/>
             </intent-filter>

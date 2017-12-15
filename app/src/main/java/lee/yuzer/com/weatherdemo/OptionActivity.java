@@ -1,5 +1,8 @@
 package lee.yuzer.com.weatherdemo;
 
+import android.app.AlarmManager;
+import android.app.PendingIntent;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
@@ -205,9 +208,7 @@ public class OptionActivity extends AppCompatActivity implements View.OnClickLis
 
                 Log.d("service", "start");
             } else {
-                Intent intent = new Intent(this, AutoUpdateService.class);
-                stopService(intent);
-                Log.d("service", "stop");
+
             }
         }
     }

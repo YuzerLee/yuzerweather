@@ -5,6 +5,7 @@ import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.Uri;
 import android.os.IBinder;
 import android.os.SystemClock;
 import android.preference.PreferenceManager;
@@ -25,6 +26,7 @@ import okhttp3.Response;
 
 public class AutoUpdateService extends Service {
     private List<StoredCity> mStoredCities;
+    private static String SERVICE_START = "lee.yuzer.com.houtai";
 
     public AutoUpdateService() {
     }
@@ -37,31 +39,45 @@ public class AutoUpdateService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        updateWeather();
-        updateBingPic();
-        AlarmManager manager = (AlarmManager) getSystemService(ALARM_SERVICE);
-        //从SP中读取用户的选择，进行相应时间间隔的刷新
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-        String info = prefs.getString("selected_text", "未知");
-        int RefreshHour = 0;
-        if (info.equals("半小时")) {
-            RefreshHour = 30 * 60 * 1000;
-        } else if (info.equals("1小时")) {
-            RefreshHour = 60 * 60 * 1000;
-        } else if (info.equals("6小时")) {
-            RefreshHour = 6 * 60 * 60 * 1000;
-        } else if (info.equals("12小时")) {
-            RefreshHour = 12 * 60 * 60 * 1000;
-        } else if (info.equals("24小时")) {
-            RefreshHour = 24 * 60 * 60 * 1000;
-        } else {
-            RefreshHour = 30 * 60 * 1000;
+        SharedPreferences prefs1 = PreferenceManager.getDefaultSharedPreferences(this);
+        Boolean state = prefs1.getBoolean("switch_state", true);
+        if (state == true) {
+            //如果状态为开启，则继续定时操作
+            updateWeather();
+            updateBingPic();
+            AlarmManager manager = (AlarmManager) getSystemService(ALARM_SERVICE);
+            //从SP中读取用户的选择，进行相应时间间隔的刷新
+            SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+            String info = prefs.getString("selected_text", "未知");
+            int RefreshHour = 0;
+            if (info.equals("半小时")) {
+                RefreshHour = 30 * 60 * 1000;
+            } else if (info.equals("1小时")) {
+                RefreshHour = 60 * 60 * 1000;
+            } else if (info.equals("6小时")) {
+                RefreshHour = 6 * 60 * 60 * 1000;
+            } else if (info.equals("12小时")) {
+                RefreshHour = 12 * 60 * 60 * 1000;
+            } else if (info.equals("24小时")) {
+                RefreshHour = 24 * 60 * 60 * 1000;
+            } else {
+                RefreshHour = 30 * 60 * 1000;
+            }
+            long triggerAtTime = SystemClock.elapsedRealtime() + 60 * 1000;
+            Intent i = new Intent(this, AutoUpdateService.class);
+            intent.setAction(SERVICE_START);
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            PendingIntent pi = PendingIntent.getService(this, 0, i, 0);
+            manager.set(AlarmManager.ELAPSED_REALTIME_WAKEUP, triggerAtTime, pi);
+        }else{
+            //如果状态为取消，则将闹钟取消
+            AlarmManager manager = (AlarmManager) getSystemService(ALARM_SERVICE);
+            Intent i = new Intent(this, AutoUpdateService.class);
+            intent.setAction(SERVICE_START);
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            PendingIntent pi = PendingIntent.getService(this, 0, i, 0);
+            manager.cancel(pi);
         }
-        long triggerAtTime = SystemClock.elapsedRealtime() + 60 * 1000;
-        Intent i = new Intent(this, AutoUpdateService.class);
-        PendingIntent pi = PendingIntent.getService(this, 0, i, 0);
-        manager.cancel(pi);
-        manager.set(AlarmManager.ELAPSED_REALTIME_WAKEUP, triggerAtTime, pi);
         return super.onStartCommand(intent, flags, startId);
     }
 
