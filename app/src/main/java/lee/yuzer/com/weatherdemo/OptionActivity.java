@@ -23,8 +23,11 @@ import android.widget.PopupWindow;
 import android.widget.RelativeLayout;
 import android.widget.Switch;
 import android.widget.TextView;
+
 import com.bumptech.glide.Glide;
+
 import java.io.IOException;
+
 import lee.yuzer.com.weatherdemo.service.AutoUpdateService;
 import lee.yuzer.com.weatherdemo.util.HttpUtil;
 import okhttp3.Call;
@@ -43,7 +46,7 @@ public class OptionActivity extends AppCompatActivity implements View.OnClickLis
     private PopupWindow popupWindow;
     private boolean switchstateold;
     private String intervalold;
-    private static String SERVICE_START= "lee.yuzer.com.houtai";
+    private static String SERVICE_START = "lee.yuzer.com.houtai";
 
     public Handler mHandler = new Handler() {
         @Override
@@ -166,7 +169,6 @@ public class OptionActivity extends AppCompatActivity implements View.OnClickLis
     }
 
 
-
     @Override
     protected void onResume() {
         super.onResume();
@@ -187,21 +189,22 @@ public class OptionActivity extends AppCompatActivity implements View.OnClickLis
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
         Boolean state = prefs.getBoolean("switch_state", true);
         if (state == switchstateold) {
-            if(state == true && (!intervalText.getText().toString().equals(intervalold))){
+            if (state == true && (!intervalText.getText().toString().equals(intervalold))) {
                 Intent intent = new Intent(this, AutoUpdateService.class);
-                startService(intent);
                 intent.setAction(SERVICE_START);
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                startService(intent);
                 Log.d("service", "start");
             }
         } else {
-            if(state == true){
+            if (state == true) {
                 Intent intent = new Intent(this, AutoUpdateService.class);
-                startService(intent);
                 intent.setAction(SERVICE_START);
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                startService(intent);
+
                 Log.d("service", "start");
-            }else{
+            } else {
                 Intent intent = new Intent(this, AutoUpdateService.class);
                 stopService(intent);
                 Log.d("service", "stop");

@@ -21,11 +21,15 @@ import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
+
 import com.bumptech.glide.Glide;
+
 import org.litepal.crud.DataSupport;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+
 import lee.yuzer.com.weatherdemo.db.StoredCity;
 import lee.yuzer.com.weatherdemo.gson.Forecast;
 import lee.yuzer.com.weatherdemo.gson.Lifestyle;
@@ -60,7 +64,7 @@ public class WeatherViewPagerActivity extends AppCompatActivity implements ViewP
     private List<StoredCity> mStoredCities;
     private List<ImageView> dotView;
     private Button removeCityButton;
-    private static String SERVICE_START= "lee.yuzer.com.houtai";
+    private static String SERVICE_START = "lee.yuzer.com.houtai";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

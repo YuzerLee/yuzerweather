@@ -43,8 +43,8 @@ public class BasePopupWindow extends PopupWindow {
     @Override
     public void setOutsideTouchable(boolean touchable) {
         super.setOutsideTouchable(touchable);
-        if(touchable) {
-            if(mBackgroundDrawable == null) {
+        if (touchable) {
+            if (mBackgroundDrawable == null) {
                 mBackgroundDrawable = new ColorDrawable(0x00000000);
             }
             super.setBackgroundDrawable(mBackgroundDrawable);
@@ -61,7 +61,7 @@ public class BasePopupWindow extends PopupWindow {
 
     /**
      * 初始化BasePopupWindow的一些信息
-     * */
+     */
     private void initBasePopupWindow() {
         setAnimationStyle(android.R.style.Animation_Dialog);
         setHeight(ViewGroup.LayoutParams.WRAP_CONTENT);
@@ -72,28 +72,28 @@ public class BasePopupWindow extends PopupWindow {
 
     @Override
     public void setContentView(View contentView) {
-        if(contentView != null) {
+        if (contentView != null) {
             contentView.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED);
             super.setContentView(contentView);
             addKeyListener(contentView);
-            mRadioGroup = (RadioGroup)contentView.findViewById(R.id.radiogroup);
-            halfRButton = (RadioButton)contentView.findViewById(R.id.half_rt);
-            oneRButton = (RadioButton)contentView.findViewById(R.id.one_rt);
-            sixRButton = (RadioButton)contentView.findViewById(R.id.six_rt);
-            twelveRButton = (RadioButton)contentView.findViewById(R.id.twelve_rt);
-            onedayRButton = (RadioButton)contentView.findViewById(R.id.oneday_rt);
-            cancelButton = (Button)contentView.findViewById(R.id.cancel_button);
-            if(OptionActivity.SendInfo.equals("未知")){
+            mRadioGroup = (RadioGroup) contentView.findViewById(R.id.radiogroup);
+            halfRButton = (RadioButton) contentView.findViewById(R.id.half_rt);
+            oneRButton = (RadioButton) contentView.findViewById(R.id.one_rt);
+            sixRButton = (RadioButton) contentView.findViewById(R.id.six_rt);
+            twelveRButton = (RadioButton) contentView.findViewById(R.id.twelve_rt);
+            onedayRButton = (RadioButton) contentView.findViewById(R.id.oneday_rt);
+            cancelButton = (Button) contentView.findViewById(R.id.cancel_button);
+            if (OptionActivity.SendInfo.equals("未知")) {
                 halfRButton.setChecked(true);
-            }else if(OptionActivity.SendInfo.equals("半小时")){
+            } else if (OptionActivity.SendInfo.equals("半小时")) {
                 halfRButton.setChecked(true);
-            }else if(OptionActivity.SendInfo.equals("1小时")){
+            } else if (OptionActivity.SendInfo.equals("1小时")) {
                 oneRButton.setChecked(true);
-            }else if(OptionActivity.SendInfo.equals("6小时")){
+            } else if (OptionActivity.SendInfo.equals("6小时")) {
                 sixRButton.setChecked(true);
-            }else if(OptionActivity.SendInfo.equals("12小时")){
+            } else if (OptionActivity.SendInfo.equals("12小时")) {
                 twelveRButton.setChecked(true);
-            }else if(OptionActivity.SendInfo.equals("24小时")){
+            } else if (OptionActivity.SendInfo.equals("24小时")) {
                 onedayRButton.setChecked(true);
             }
 
@@ -102,7 +102,7 @@ public class BasePopupWindow extends PopupWindow {
             mRadioGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
                 @Override
                 public void onCheckedChanged(RadioGroup group, int checkedId) {
-                    switch (checkedId){
+                    switch (checkedId) {
                         case R.id.half_rt:
                             SelectedItemText = halfRButton.getText().toString();
                             dismiss();
@@ -129,7 +129,7 @@ public class BasePopupWindow extends PopupWindow {
                             //OptionActivity.SendInfo = SelectedItemText;
                             break;
                         default:
-                                break;
+                            break;
                     }
                 }
             });
@@ -182,9 +182,9 @@ public class BasePopupWindow extends PopupWindow {
 
     /**
      * 为窗体添加outside点击事件
-     * */
+     */
     private void addKeyListener(View contentView) {
-        if(contentView != null) {
+        if (contentView != null) {
             contentView.setFocusable(true);
             contentView.setFocusableInTouchMode(true);
             contentView.setOnKeyListener(new View.OnKeyListener() {

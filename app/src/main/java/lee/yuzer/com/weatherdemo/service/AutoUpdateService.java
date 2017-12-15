@@ -9,9 +9,12 @@ import android.os.IBinder;
 import android.os.SystemClock;
 import android.preference.PreferenceManager;
 import android.util.Log;
+
 import org.litepal.crud.DataSupport;
+
 import java.io.IOException;
 import java.util.List;
+
 import lee.yuzer.com.weatherdemo.db.StoredCity;
 import lee.yuzer.com.weatherdemo.gson.Weather;
 import lee.yuzer.com.weatherdemo.util.HttpUtil;
@@ -54,7 +57,7 @@ public class AutoUpdateService extends Service {
         } else {
             RefreshHour = 30 * 60 * 1000;
         }
-        long triggerAtTime = SystemClock.elapsedRealtime() + RefreshHour;
+        long triggerAtTime = SystemClock.elapsedRealtime() + 60 * 1000;
         Intent i = new Intent(this, AutoUpdateService.class);
         PendingIntent pi = PendingIntent.getService(this, 0, i, 0);
         manager.cancel(pi);
