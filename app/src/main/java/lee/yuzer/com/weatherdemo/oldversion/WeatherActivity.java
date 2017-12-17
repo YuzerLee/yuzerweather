@@ -1,4 +1,4 @@
-package lee.yuzer.com.weatherdemo;
+package lee.yuzer.com.weatherdemo.oldversion;
 
 import android.content.SharedPreferences;
 import android.graphics.Color;
@@ -21,10 +21,9 @@ import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 
-import org.w3c.dom.Text;
-
 import java.io.IOException;
 
+import lee.yuzer.com.weatherdemo.R;
 import lee.yuzer.com.weatherdemo.gson.Forecast;
 import lee.yuzer.com.weatherdemo.gson.Lifestyle;
 import lee.yuzer.com.weatherdemo.gson.Weather;
@@ -74,8 +73,8 @@ public class WeatherActivity extends AppCompatActivity {
         degreeText = (TextView)findViewById(R.id.degree_text);
         weatherInfoText = (TextView)findViewById(R.id.weather_info_text);
         forecastLayout = (LinearLayout)findViewById(R.id.forecast_layout);
-        aqiText = (TextView)findViewById(R.id.aqi_text);
-        pm25Text = (TextView)findViewById(R.id.pm25_text);
+//        aqiText = (TextView)findViewById(R.id.aqi_text);
+//        pm25Text = (TextView)findViewById(R.id.pm25_text);
         comfortText = (TextView)findViewById(R.id.comfort_text);
         carWashText = (TextView)findViewById(R.id.car_wash_text);
         sportText = (TextView)findViewById(R.id.sport_text);

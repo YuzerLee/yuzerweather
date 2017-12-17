@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="MyProgressBar">
+        <attr name="current_progress" format="integer"/>
+        <attr name="chart_title" format="string"/>
+        <attr name="max_progress" format="integer"/>
+        <attr name="progress_unit" format="string"/>
+    </declare-styleable>
+</resources>

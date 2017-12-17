@@ -12,6 +12,7 @@ import org.json.JSONObject;
 import lee.yuzer.com.weatherdemo.db.City;
 import lee.yuzer.com.weatherdemo.db.County;
 import lee.yuzer.com.weatherdemo.db.Province;
+import lee.yuzer.com.weatherdemo.gson.AQI;
 import lee.yuzer.com.weatherdemo.gson.Weather;
 
 /**
@@ -106,6 +107,23 @@ public class Utility {
             JSONArray jsonArray = jsonObject.getJSONArray("HeWeather6");
             String weatherContent = jsonArray.getJSONObject(0).toString();
             return new Gson().fromJson(weatherContent, Weather.class);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    /**
+     * 将返回的JSON数据解析成WeatherAQI实体类
+     * @param response
+     * @return
+     */
+    public static AQI handleWeatherAQIResponse(String response){
+        try{
+            JSONObject jsonObject = new JSONObject(response);
+            JSONArray jsonArray = jsonObject.getJSONArray("HeWeather6");
+            String AQIContent = jsonArray.getJSONObject(0).toString();
+            return new Gson().fromJson(AQIContent, AQI.class);
         }catch (Exception e){
             e.printStackTrace();
         }

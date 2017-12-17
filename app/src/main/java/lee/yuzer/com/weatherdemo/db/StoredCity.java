@@ -20,6 +20,15 @@ public class StoredCity extends DataSupport{
     private String time;
     private String name;
     private String content;
+    private String aqicontent;
+
+    public String getAqicontent() {
+        return aqicontent;
+    }
+
+    public void setAqicontent(String aqicontent) {
+        this.aqicontent = aqicontent;
+    }
 
     public String getTime() {
         return time;

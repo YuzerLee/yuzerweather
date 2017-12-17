@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              xmlns:app="http://schemas.android.com/apk/res-auto"
+              android:id="@+id/aqi_layout"
               android:layout_width="match_parent"
               android:layout_height="wrap_content"
               android:layout_margin="15dp"
@@ -9,8 +11,8 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="15dp"
         android:layout_marginLeft="15dp"
+        android:layout_marginTop="15dp"
         android:text="空气质量"
         android:textColor="#fff"
         android:textSize="20sp"/>
@@ -18,67 +20,212 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="15dp">
+        android:layout_margin="15dp"
+        android:orientation="horizontal">
 
-        <RelativeLayout
+        <LinearLayout
             android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1">
+            android:layout_height="150dp"
+            android:layout_weight="1"
+            android:orientation="horizontal">
 
+            <lee.yuzer.com.weatherdemo.customizeview.MyProgressBar
+                android:id="@+id/myProgressBar"
+                android:layout_width="150dp"
+                android:layout_height="150dp"
+                android:layout_gravity="center_horizontal"
+                app:chart_title="污染指数"
+                app:current_progress="200"
+                app:max_progress="500"
+                app:progress_unit="pm2.5"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="150dp"
+            android:layout_weight="1"
+            android:orientation="vertical">
             <LinearLayout
+                android:layout_marginTop="3dp"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:layout_centerInParent="true">
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:orientation="horizontal">
 
                 <TextView
-                    android:id="@+id/aqi_text"
-                    android:layout_width="wrap_content"
+                    android:text="PM10"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
+                    android:layout_weight="1"
                     android:layout_gravity="center"
-                    android:textColor="#fff"
-                    android:textSize="40sp"/>
+                    android:gravity="left"
+                    android:paddingLeft="25dp"
+                    android:textSize="15sp"
+                    android:textColor="#aaf0f1f2"/>
 
                 <TextView
-                    android:layout_width="wrap_content"
+                    android:text="36"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
+                    android:id="@+id/pm10_text"
+                    android:layout_weight="1"
                     android:layout_gravity="center"
-                    android:text="AQI 指数"
-                    android:textColor="#fff"/>
-
+                    android:gravity="left"
+                    android:paddingLeft="5dp"
+                    android:textSize="15sp"
+                    android:textColor="#ffffff"/>
             </LinearLayout>
 
-        </RelativeLayout>
-
-        <RelativeLayout
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1">
-
             <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:layout_centerInParent="true">
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:orientation="horizontal">
+                <TextView
+                    android:text="PM2.5"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_gravity="center"
+                    android:gravity="left"
+                    android:paddingLeft="25dp"
+                    android:textSize="15sp"
+                    android:textColor="#aaf0f1f2"/>
 
                 <TextView
+                    android:text="36"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
                     android:id="@+id/pm25_text"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
                     android:layout_gravity="center"
-                    android:textColor="#fff"
-                    android:textSize="40sp"/>
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:text="PM2.5 指数"
-                    android:textColor="#fff"/>
-
+                    android:gravity="left"
+                    android:paddingLeft="5dp"
+                    android:textSize="15sp"
+                    android:textColor="#ffffff"/>
             </LinearLayout>
 
-        </RelativeLayout>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:orientation="horizontal">
+                <TextView
+                    android:text="no2"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_gravity="center"
+                    android:gravity="left"
+                    android:paddingLeft="25dp"
+                    android:textSize="15sp"
+                    android:textColor="#aaf0f1f2"/>
+
+                <TextView
+                    android:text="36"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/no2_text"
+                    android:layout_weight="1"
+                    android:layout_gravity="center"
+                    android:gravity="left"
+                    android:paddingLeft="5dp"
+                    android:textSize="15sp"
+                    android:textColor="#ffffff"/>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:orientation="horizontal">
+                <TextView
+                    android:text="so2"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_gravity="center"
+                    android:gravity="left"
+                    android:paddingLeft="25dp"
+                    android:textSize="15sp"
+                    android:textColor="#aaf0f1f2"/>
+
+                <TextView
+                    android:text="36"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/so2_text"
+                    android:layout_weight="1"
+                    android:layout_gravity="center"
+                    android:gravity="left"
+                    android:paddingLeft="5dp"
+                    android:textSize="15sp"
+                    android:textColor="#ffffff"/>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:orientation="horizontal">
+                <TextView
+                    android:text="o3"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_gravity="center"
+                    android:gravity="left"
+                    android:paddingLeft="25dp"
+                    android:textSize="15sp"
+                    android:textColor="#aaf0f1f2"/>
+
+                <TextView
+                    android:text="36"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/o3_text"
+                    android:layout_weight="1"
+                    android:layout_gravity="center"
+                    android:gravity="left"
+                    android:paddingLeft="5dp"
+                    android:textSize="15sp"
+                    android:textColor="#ffffff"/>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:orientation="horizontal"
+                android:layout_marginBottom="3dp">
+                <TextView
+                    android:text="co"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_gravity="center"
+                    android:gravity="left"
+                    android:paddingLeft="25dp"
+                    android:textSize="15sp"
+                    android:textColor="#aaf0f1f2"/>
+
+                <TextView
+                    android:text="36"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/co_text"
+                    android:layout_weight="1"
+                    android:layout_gravity="center"
+                    android:gravity="left"
+                    android:paddingLeft="5dp"
+                    android:textSize="15sp"
+                    android:textColor="#ffffff"/>
+            </LinearLayout>
+
+
+
+        </LinearLayout>
 
     </LinearLayout>
 

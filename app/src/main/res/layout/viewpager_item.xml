@@ -9,7 +9,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <ScrollView
+        <lee.yuzer.com.weatherdemo.customizeview.MyScrollView
             android:id="@+id/weather_layout"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
@@ -25,13 +25,13 @@
 
                 <include layout="@layout/forecast"/>
 
-                <include layout="@layout/aqi"/>
-
                 <include layout="@layout/suggestion"/>
+
+                <include layout="@layout/aqi"/>
 
             </LinearLayout>
 
-        </ScrollView>
+        </lee.yuzer.com.weatherdemo.customizeview.MyScrollView>
 
     </android.support.v4.widget.SwipeRefreshLayout>
 

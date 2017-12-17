@@ -63,7 +63,7 @@ public class AutoUpdateService extends Service {
             } else {
                 RefreshHour = 30 * 60 * 1000;
             }
-            long triggerAtTime = SystemClock.elapsedRealtime() + 60 * 1000;
+            long triggerAtTime = SystemClock.elapsedRealtime() + RefreshHour;
             Intent i = new Intent(this, AutoUpdateService.class);
             intent.setAction(SERVICE_START);
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);

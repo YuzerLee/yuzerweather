@@ -5,9 +5,8 @@ package lee.yuzer.com.weatherdemo.gson;
  */
 
 public class AQI {
-    public AQICity city;
-    public class AQICity {
-        public String aqi;
-        public String pm25;
-    }
+    public Air_now_city air_now_city;
+    public String status;
+
+    public Basic basic;
 }
